@@ -14,7 +14,7 @@ class MainWidget():
         form1.pack(fill = 'y')
         self.form2 = MainFrame( self.mainform )
         self.form2.pack()
-        for i in range( 6 ):
+        for i in range( 7 ):
             button.append( ThemedButton(form1) )
         button[0].config(text = "Открыть", command = self.open_collection )
         button[1].config(text = "Сохранить", command = self.save_collection)
@@ -22,6 +22,7 @@ class MainWidget():
         button[3].config(text = "Добавить/изменить слот", command = self.add_slot)
         button[4].config(text = "Поиск", command = self.find_keys)
         button[5].config(text = "Удалить", command = self.delete)
+        button[6].config(text = "Просмотр коллекции", command = self.watch)
 
         for i in range(len(button)):
             button[i].pack(in_ = form1, side = 'top', padx = 30, pady = 5)
@@ -227,6 +228,47 @@ class MainWidget():
                 else:
                     showinfo('Удаление', "Ничего не найдено!")
 
+    def watch(self):
+        self.clear_form()
+        self.form3 = Navs1( self.form2, padx=0 )
+        self.form3.pack( side = 'top', expand=True, fill="both" )
+        self.form4 = Navs( self.form2, padx=0 )
+        self.form4.pack(side = 'top',  expand=True, fill="both" )
+
+        self.form5 = Navs1( self.form3, padx=40, pady = 40 )
+        self.form5.pack( side='top', expand=True, fill="both" )
+
+
+
+
+        sbar = interface.Scrollbar( self.form5 )
+        list = interface.Listbox( self.form5, relief='solid', bd=1, font='verdana 12' )
+
+
+        sbar.config( command=list.yview )
+        list.config( yscrollcommand=sbar.set )
+        sbar.pack( side='right', fill='y' )
+        list.pack( side='left', expand=True, fill='both' )
+        self.text_message = ThemedOut( self.form4 )
+
+        pos = 0
+        for label in self.collection.keys():
+            list.insert( pos, label )
+            pos += 1
+        list.config( selectmode='single' )
+        list.bind( '<Double-1>', self.handleList )
+        self.listbox = list
+
+    def handleList(self, event):
+        self.index = self.listbox.curselection()
+        self.label = self.listbox.get( self.index )
+        self.listbox.activate( self.index )
+        self.runCommand( self.index )
+
+    def runCommand(self, selection):
+        self.text_message.destroy()
+        self.text_message = ThemedOut( self.form4 )
+        self.text_message.config( text=self.collection[self.label] )
 
 
     def clear_form(self):

@@ -23,7 +23,7 @@ class Navs1( interface.Frame ):
     def __init__(self, parent=None, **configs):
         interface.Frame.__init__( self, parent, **configs )
         self.pack( side="top" )
-        self.config( bg='white', padx=30, pady=30 )
+        self.config( bg='white', padx=60, pady=30 )
 
 
 class Container(interface.Frame):
