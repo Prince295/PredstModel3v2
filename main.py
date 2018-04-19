@@ -169,13 +169,13 @@ class MainWidget():
             for k,v in self.collection.items():
                 if keyword in v.keys():
                     showinfo( 'Поиск',
-                              "Найден слот '{}' со значением '{}' ".format( keyword, v[keyword] ) )
+                              "Во фрейме '{}' Найден слот '{}' со значением '{}' ".format(k, keyword, v[keyword] ) )
 
                 elif keyword in v.values():
                     for key,val in v.items():
                         if keyword == val:
                              showinfo( 'Поиск',
-                                  "Найден слот '{}' со значением '{}' ".format( key, keyword ) )
+                                  "Во фрейме '{}' Найден слот '{}' со значением '{}' ".format(k, key, keyword ) )
                 else:
                     showinfo('Поиск', "Ничего не найдено!")
 
@@ -216,14 +216,14 @@ class MainWidget():
         else:
             for k,v in self.collection.items():
                 if keyword in v.keys():
-                    if askyesno( 'Удаление', "Найден слот '{}' со значением '{}' , удалить?".format( keyword, v[keyword] ) ):
+                    if askyesno( 'Удаление', "Во фрейме '{}'  Найден слот '{}' со значением '{}' , удалить?".format(k, keyword, v[keyword] ) ):
                         v.pop(keyword)
 
 
                 elif keyword in v.values():
                     for key,val in v.items():
                         if keyword == val:
-                             if askyesno( 'Удаление', "Найден слот '{}' со значением '{}' , удаление?".format( key, keyword ) ):
+                             if askyesno( 'Удаление', " Во фрейме '{}' Найден слот '{}' со значением '{}' , удаление?".format(k, key, keyword ) ):
                                  v.pop(key)
                 else:
                     showinfo('Удаление', "Ничего не найдено!")
