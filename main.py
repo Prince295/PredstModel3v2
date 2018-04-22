@@ -14,15 +14,16 @@ class MainWidget():
         form1.pack(fill = 'y')
         self.form2 = MainFrame( self.mainform )
         self.form2.pack()
-        for i in range( 7 ):
+        for i in range( 8 ):
             button.append( ThemedButton(form1) )
         button[0].config(text = "Открыть", command = self.open_collection )
         button[1].config(text = "Сохранить", command = self.save_collection)
         button[2].config(text = "Добавить/изменить фрейм", command = self.add_frame)
         button[3].config(text = "Добавить/изменить слот", command = self.add_slot)
-        button[4].config(text = "Поиск", command = self.find_keys)
+        button[4].config(text = "Поиск по названию", command = self.find_keys)
         button[5].config(text = "Удалить", command = self.delete)
         button[6].config(text = "Просмотр коллекции", command = self.watch)
+        button[7].config(text = "Поиск по значению", command = self.find_values)
 
         for i in range(len(button)):
             button[i].pack(in_ = form1, side = 'top', padx = 30, pady = 5)
@@ -59,11 +60,13 @@ class MainWidget():
         button2 = CommandButton( container2 )
         button2.config( text='Отмена', command=lambda: self.clear_form() )
 
-        for i in range( 1 ):
+        for i in range( 2 ):
             label.append( OutLabel( form1 ) )
             entry.append( ThemedMessage( form2 ) )
 
         label[0].config( text="Имя фрейма" )
+        label[1].config(text = "Слот-ссылка")
+
 
 
 
@@ -77,14 +80,19 @@ class MainWidget():
 
     def add_frame_to_dict(self,entry):
         frame = entry[0].get()
-        if frame not in self.collection.keys():
+        slot = entry[1].get()
+
+        if frame not in self.collection.keys() :
             self.collection[frame] = {}
             showinfo("Добавление", "Успешно!")
         else:
-            if askyesno('Изменение','Фрейм с таким названием существует, хотите очистить его? '):
-                self.collection[frame] = {}
-            else:
-                pass
+            if slot != "" :
+                self.collection[frame][slot] = {}
+            else :
+                if askyesno('Изменение','Фрейм с таким названием существует, хотите очистить его? '):
+                    self.collection[frame] = {}
+                else:
+                    pass
         print(self.collection)
 
 
@@ -125,12 +133,18 @@ class MainWidget():
         frame = entry[0].get()
         slot = entry[1].get()
         value = entry[2].get()
-        if slot not in self.collection[frame].keys():
-            self.collection[frame].update({slot : value})
+        finder = self.collection
+        for k, v in self.collection.items():
+            for key, val in v.items():
+                if type(val) == dict:
+                    if frame in v.keys():
+                        finder = v
+        if slot not in finder[frame].keys():
+            finder[frame].update({slot : value})
             showinfo( "Добавление", "Успешно!" )
         else:
             if askyesno( 'Изменение', 'Слот с таким названием существует, хотите изменить его? ' ):
-                self.collection[frame][slot] = value
+                finder[frame][slot] = value
             else:
                 pass
 
@@ -163,22 +177,99 @@ class MainWidget():
 
     def find_keys_in_dict(self,entry):
         keyword = entry[0].get()
-        if keyword in self.collection.keys():
-            showinfo('Поиск', "Найден фрейм '{}' со слотами '{}' ".format(keyword,list(self.collection[keyword].keys())))
+        if ',' in keyword:
+            key = keyword.split(",")
+            print(key)
         else:
-            for k,v in self.collection.items():
-                if keyword in v.keys():
-                    showinfo( 'Поиск',
-                              "Во фрейме '{}' Найден слот '{}' со значением '{}' ".format(k, keyword, v[keyword] ) )
+            key =[keyword]
 
-                elif keyword in v.values():
-                    for key,val in v.items():
-                        if keyword == val:
-                             showinfo( 'Поиск',
-                                  "Во фрейме '{}' Найден слот '{}' со значением '{}' ".format(k, key, keyword ) )
-                else:
-                    showinfo('Поиск', "Ничего не найдено!")
+        string = ""
 
+        for i in range(len(key)):
+            if key[i] in self.collection.keys():
+                string += 'Поиск', "Найден фрейм '{}' со слотами '{}' ".format(key[i],list(self.collection[key[i]].keys()))
+            else:
+                for k,v in self.collection.items():
+                    if key[i] in v.keys():
+                        if  type(v[key[i]]) == dict:
+                            string += "Найден фрейм '{}' по слот-фрейму '{}'  \n".format( k, key[i] )
+
+                        else:
+                            string += "Найден фрейм '{}' по слоту '{}' со значением '{}' \n".format( k, key[i],
+                                                                                                     v[key[i]] )
+
+                    else:
+                        for keyy, vall in v.items():
+                            if type(vall) == dict:
+                                if key[i] in vall.keys():
+                                    string += "Найден фрейм '{}' по слоту '{}' в слот-фрейме '{}'  \n".format( k, key[i], keyy )
+
+
+                            # elif keyword in v.values():
+                    #     for keyy,val in v.items():
+                    #         if keyword == val:
+                    #              showinfo( 'Поиск',
+                    #                   "Во фрейме '{}' Найден слот '{}' со значением '{}' ".format(k, keyy, key ) )
+        if string == "":
+            showinfo("Поиск", "Ничего не найдено!")
+        else:
+            showinfo("Поиск", string)
+
+    def find_values(self):
+        self.clear_form()
+        form1 = Navs( self.form2, padx=0 )
+        form1.pack( expand=True, fill="both" )
+        form2 = Navs( self.form2, padx=0 )
+        form2.pack( expand=True, fill="both" )
+        label = []
+        entry = []
+
+        container1 = Container( form1 )
+        container2 = Container( form2 )
+        button1 = CommandButton( container1 )
+        button1.config( text='Искать', command=lambda: self.find_values_in_dict( entry ) )
+
+        for i in range( 1 ):
+            label.append( OutLabel( form1 ) )
+            entry.append( ThemedMessage( form2 ) )
+
+        label[0].config( text="Поиск" )
+
+        for i in range( len( label ) ):
+            label[i].pack( in_=form1, side='top', padx=10, pady=5 )
+            entry[i].pack( in_=form2, side='top', padx=10, pady=5 )
+        container1.pack( side='bottom', fill='x', expand=True )
+        button1.pack( side='right', padx=0.5 )
+        container2.pack( side='bottom', fill='x', expand=True )
+
+    def find_values_in_dict(self, entry):
+        keyword = entry[0].get()
+        if ',' in keyword:
+            key = keyword.split( "," )
+            print( key )
+        else:
+            key = [keyword]
+
+        string = ""
+
+        for i in range( len( key ) ):
+            for k, v in self.collection.items():
+
+                for keyy,val in v.items():
+                    if type(val) != dict:
+                        if key[i] == val:
+                                string += "Найден фрейм '{}' со слотом '{}' по значению '{}' \n".format(k, keyy, key[i] )
+
+                    else:
+                        for kkey,vall in val.items():
+                            if key[i] == vall:
+                                string += "Найден фрейм '{}'  - во фрейме-ссылке '{}' со слотом '{}' по значениюм '{}' \n".format( k,
+                                                                                                         keyy, kkey, key[i] )
+
+        if string == "":
+            showinfo( "Поиск", "Ничего не найдено!" )
+        else:
+            showinfo( "Поиск", string )
 
     def delete(self):
         self.clear_form()
