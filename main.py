@@ -184,44 +184,54 @@ class MainWidget():
             key =[keyword]
 
         string = ""
-        values = []
-        for i in range(len(key)):
-            if key[i] in self.collection.keys():
-                string += 'Поиск', "Найден фрейм '{}' со слотами '{}' ".format(key[i],list(self.collection[key[i]].keys()))
-            else:
-                for k,v in self.collection.items():
-                    if key[i] in v.keys():
-                        if  type(v[key[i]]) == dict:
-                            string += "Найден фрейм '{}' по слот-фрейму '{}'  \n".format( k, key[i] )
-                            for index in key:
-                                if index not in self.collection[k].keys():
-                                    string = ""
 
-                        else:
-                            values.append(v[key[i]])
-                            if len(key)==1:
-                                string += "Найден фрейм '{}' по слоту '{}' со значением '{}' \n".format( k, key[i],
-                                                                                                     v[key[i]] )
-                            else:
-                                string = "Найден фрейм '{}' по слотам '{}' со значениями '{}' \n".format( k, key,
-                                                                                                         values )
-                            for index in key:
-                                if index not in self.collection[k].keys():
-                                    string = ""
+
+        if key[0] in self.collection.keys():
+            string += 'Поиск', "Найден фрейм '{}' со слотами '{}' ".format(key[0],list(self.collection[key[0]].keys()))
+        else:
+            for k,v in self.collection.items():
+                values = []
+
+                if key[0] in v.keys():
+                    if  type(v[key[0]]) == dict:
+                        string += "Найден фрейм '{}' по слот-фрейму '{}'  \n".format( k, key[i] )
+                        for index in key:
+                            if index not in self.collection[k].keys():
+                                string = ""
 
                     else:
-                        for keyy, vall in v.items():
-                            if type(vall) == dict:
-                                if key[i] in vall.keys():
-                                    if len(key) ==1:
-                                        string += "Найден фрейм '{}' по слоту '{}' в слот-фрейме '{}'  \n".format( k, key[i], keyy )
-                                    else:
-                                        string = "Найден фрейм '{}' по слотам '{}' в слот-фрейме '{}'  \n".format( k,
-                                                                                                                   key,
-                                                                                                                   keyy )
+
+                        if len(key)==1:
+                            string += "Найден фрейм '{}' по слоту '{}' со значением '{}' \n".format( k, key[i],
+                                                                                                 v[key[i]] )
+                        else:
+                            flag = 0
+                            for index in key:
+                                if index in self.collection[k].keys():
+                                    values.append( v[index] )
+                                    flag +=1
+                            if flag == len(key):
+                                string += "Найден фрейм '{}' по слотам '{}' со значениями '{}' \n".format( k, key,
+                                                                                                     values )
+
+
+                else:
+                    for keyy, vall in v.items():
+                        if type(vall) == dict:
+                            if key[0] in vall.keys():
+                                if len(key) ==1:
+                                    string += "Найден фрейм '{}' по слоту '{}' в слот-фрейме '{}'  \n".format( k, key[0], keyy )
+                                else:
+                                    flag = 0
                                     for index in key:
-                                        if index not in self.collection[k][keyy].keys():
-                                            string = ""
+                                        if index in self.collection[k].keys():
+                                            values.append( v[index] )
+                                            flag += 1
+                                    if flag == len( key ):
+                                        string += "Найден фрейм '{}' по слотам '{}' в слот-фрейме '{}'  \n".format( k,
+                                                                                                               key,
+                                                                                                               keyy )
+
 
 
         if string == "":
@@ -265,36 +275,53 @@ class MainWidget():
             key = [keyword]
 
         string = ""
-        slots=[]
-        for i in range( len( key ) ):
-            for k, v in self.collection.items():
 
-                for keyy,val in v.items():
-                    if type(val) != dict:
-                        if key[i] == val:
-                            slots.append(keyy)
-                            if len( key ) == 1:
-                                string += "Найден фрейм '{}' со слотом '{}' по значению '{}' \n".format(k, keyy, key[i] )
-                            else:
-                                string += "Найден фрейм '{}' со слотами '{}' по значениям '{}' \n".format( k, slots,key )
+
+        for k, v in self.collection.items():
+
+            for keyy,val in v.items():
+                if type(val) != dict:
+                    if key[0] == val:
+                        if len( key ) == 1:
+                            string += "Найден фрейм '{}' со слотом '{}' по значению '{}' \n".format(k, keyy, key[0] )
+                        else:
+                            flag = 0
+                            slots = []
                             for index in key:
-                                if index not in self.collection[k].values():
-                                    string = ""
+                                hh=""
+                                if index in self.collection[k].values():
+                                    for yy,xx in self.collection[k].items():
+                                        if xx == index:
+                                           hh = yy
+                                    slots.append( hh )
+                                    flag +=1
+                            if flag == len(key):
+                                string += "Найден фрейм '{}' со слотами '{}' по значениям '{}' \n".format( k, slots,key )
 
-                    else:
-                        for kkey,vall in val.items():
-                            if key[i] == vall:
-                                slots.append( keyy )
-                                if len(key) == 1:
-                                    string += "Найден фрейм '{}'  - во фрейме-ссылке '{}' со слотом '{}' по значению '{}' \n".format( k,
-                                                                                                         keyy, key[i] )
-                                else:
-                                    string = "Найден фрейм '{}'  - во фрейме-ссылке '{}'  по значениям '{}' слотов '{}' \n".format(
-                                                                                                                k,
-                                                                                                                keyy,  key, slots )
+
+                else:
+                    for kkey,vall in val.items():
+                        if key[0] == vall:
+
+                            if len(key) == 1:
+                                string += "Найден фрейм '{}'  - во фрейме-ссылке '{}' со слотом '{}' по значению '{}' \n".format( k,
+                                                                                                     keyy, key[0] )
+                            else:
+                                flag = 0
+                                slots = []
                                 for index in key:
-                                    if index not in self.collection[k][keyy].values():
-                                        string = ""
+                                    hh=""
+                                    if index in self.collection[k][keyy].values():
+                                        for yy, xx in self.collection[k].items():
+                                            if xx == index:
+                                                hh = yy
+                                        slots.append( hh )
+                                        flag += 1
+                                if flag == len( key ):
+                                    string += "Найден фрейм '{}'  - во фрейме-ссылке '{}'  по значениям '{}' слотов '{}' \n".format(
+                                                                                                            k,
+                                                                                                            keyy,  key, slots )
+
 
         if string == "":
             showinfo( "Поиск", "Ничего не найдено!" )
